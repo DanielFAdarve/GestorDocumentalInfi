@@ -1,58 +1,59 @@
-const Sequelize = require('sequelize');
-const path = require('path');
+const sequelize = require("../config/database");
 
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: path.join(__dirname, '../db/database.sqlite'),
-  logging: false
-});
+// models
+const User = require("./user.model");
+const Company = require("./company.model");
+const UserCompany = require("./userCompany.model");
+const Resolution = require("./resolution.model");
+const Support = require("./support.model");
+const Contract = require("./contract.model");
+const UserContract = require("./userContract.model");
+const Role = require("./role.model");
+const Permission = require("./permission.model");
+const RolePermission = require("./rolePermission.model");
+const ContractPermission = require("./contractPermission.model");
 
-// Importación de modelos
-const AttentionPackages = require('./AttentionPackages.model');
-const Cie10 = require('./Cie10.model');
-const HistoryQuote = require('./HistoryQuote.model');
-const Packages = require('./Packages.model');
-const Patient = require('./Patient.model');
-const Professional = require('./Professional.model');
-const Quotes = require('./Quotes.model');
-const StatusPackages = require('./StatusPackages.model');
-const StatusQuotes = require('./StatusQuotes.model');
-const User = require('./User.model');
+// Relaciones de las tablas
+User.belongsToMany(Company, { through: UserCompany, foreignKey: "userId" });
+Company.belongsToMany(User, { through: UserCompany, foreignKey: "companyId" });
 
-// Inicialización de modelos (retornando la instancia)
-const AttentionPackagesModel = AttentionPackages.initModel(sequelize);
-const Cie10Model = Cie10.initModel(sequelize);
-const HistoryQuoteModel = HistoryQuote.initModel(sequelize);
-const PackagesModel = Packages.initModel(sequelize);
-const PatientModel = Patient.initModel(sequelize);
-const ProfessionalModel = Professional.initModel(sequelize);
-const QuotesModel = Quotes.initModel(sequelize);
-const StatusPackagesModel = StatusPackages.initModel(sequelize);
-const StatusQuotesModel = StatusQuotes.initModel(sequelize);
-const UserModel = User.initModel(sequelize);
+// 2. Company ↔ Contract (One-to-Many)
+Company.hasMany(Contract, { foreignKey: "companyId" });
+Contract.belongsTo(Company, { foreignKey: "companyId" });
 
-// Relaciones
-QuotesModel.belongsTo(ProfessionalModel, { foreignKey: 'id_profesional' });
-QuotesModel.belongsTo(PackagesModel, { foreignKey: 'id_paquetes' });
-QuotesModel.belongsTo(StatusQuotesModel, { foreignKey: 'id_estado_citas' });
+// 3. Resolution ↔ Contract (One-to-Many)
+Resolution.hasMany(Contract, { foreignKey: "resolutionId" });
+Contract.belongsTo(Resolution, { foreignKey: "resolutionId" });
 
-PackagesModel.belongsTo(PatientModel, { foreignKey: 'id_pacientes', as: 'patient' });
-PackagesModel.belongsTo(AttentionPackagesModel, { foreignKey: 'id_paquetes_atenciones', as : 'attentionPackage' });
-PackagesModel.belongsTo(StatusPackagesModel, { foreignKey: 'id_estado_citas', as : 'statusPackage' });
+// 4. Resolution ↔ Support (One-to-Many)
+Resolution.hasMany(Support, { foreignKey: "resolutionId" });
+Support.belongsTo(Resolution, { foreignKey: "resolutionId" });
 
-HistoryQuoteModel.belongsTo(QuotesModel, { foreignKey: 'id_cita', as :'Quotes' });
-HistoryQuoteModel.belongsTo(Cie10Model, { foreignKey: 'id_cie', as :'Cie10' });
+// 5. User ↔ Contract (Many-to-Many with Role through UserContract)
+User.belongsToMany(Contract, { through: UserContract, foreignKey: "userId" });
+Contract.belongsToMany(User, { through: UserContract, foreignKey: "contractId" });
 
-module.exports = {
-  sequelize,
-  AttentionPackages: AttentionPackagesModel,
-  Cie10: Cie10Model,
-  HistoryQuote: HistoryQuoteModel,
-  Packages: PackagesModel,
-  Patient: PatientModel,
-  Professional: ProfessionalModel,
-  Quotes: QuotesModel,
-  StatusPackages: StatusPackagesModel,
-  StatusQuotes: StatusQuotesModel,
-  User: UserModel
-};
+// Add Role relation to UserContract
+Role.hasMany(UserContract, { foreignKey: "roleId" });
+UserContract.belongsTo(Role, { foreignKey: "roleId" });
+
+// 6. Role ↔ Permission (Many-to-Many)
+Role.belongsToMany(Permission, { through: RolePermission, foreignKey: "roleId" });
+Permission.belongsToMany(Role, { through: RolePermission, foreignKey: "permissionId" });
+
+// 7. User ↔ Contract ↔ Permission (ContractPermission)
+User.belongsToMany(Permission, { through: ContractPermission, foreignKey: "userId" });
+Permission.belongsToMany(User, { through: ContractPermission, foreignKey: "permissionId" });
+
+Contract.hasMany(ContractPermission, { foreignKey: "contractId" });
+ContractPermission.belongsTo(Contract, { foreignKey: "contractId" });
+
+
+// (async () => {
+//   try {
+//     await sequelize.sync({ force: true });
+//     console.log("✅ Database synced successfully");
+//   } catch (error) {
+//     console.error("❌ Error syncing database:", error);
+//   }
+// })();
