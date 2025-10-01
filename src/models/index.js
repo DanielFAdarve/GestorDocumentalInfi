@@ -57,3 +57,19 @@ ContractPermission.belongsTo(Contract, { foreignKey: "contractId" });
 //     console.error("❌ Error syncing database:", error);
 //   }
 // })();
+
+
+module.exports = {
+  sequelize,
+  User,
+  Company,
+  UserCompany,
+  Resolution,
+  Support,
+  Contract,
+  UserContract,
+  Role,
+  Permission,
+  RolePermission,
+  ContractPermission,
+};
