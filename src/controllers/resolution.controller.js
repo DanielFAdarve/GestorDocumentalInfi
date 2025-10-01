@@ -9,7 +9,7 @@ class ResolutionController {
   }
 
   async getAll(req, res) {
-    const resolutions = await ResolutionService.getAllResolutions();
+    const resolutions = await ResolutionService.getAll();
     return res.json(Response.set(resolutions));
   }
 

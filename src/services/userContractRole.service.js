@@ -1,4 +1,4 @@
-const UserContractRole = require("../models/userContractRole.model");
+const UserContractRole = require("../models/userContract.model");
 const User = require("../models/user.model");
 const Contract = require("../models/contract.model");
 const Company = require("../models/company.model");
