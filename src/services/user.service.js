@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 class UserService {
   async createUser(data) {
@@ -11,9 +12,6 @@ class UserService {
       if (!data.email || typeof data.email !== "string" || data.email.trim() === "")
         return { success: false, message: "Email is required" };
 
-      if (!data.password || typeof data.password !== "string" || data.password.trim() === "")
-        return { success: false, message: "Password is required" };
-
       if (data.user_type && !["admin", "normal"].includes(data.user_type))
         return { success: false, message: "user_type must be 'admin' or 'normal'" };
 
@@ -21,8 +19,14 @@ class UserService {
       const exists = await User.findOne({ where: { email: data.email } });
       if (exists) return { success: false, message: "Email already registered" };
 
-      // Hashear contraseña con bcrypt
-      const hashedPassword = await bcrypt.hash(data.password, 10);
+      // Si no hay password → generar una temporal aleatoria
+      let plainPassword = data.password;
+      if (!plainPassword || typeof plainPassword !== "string" || plainPassword.trim() === "") {
+        plainPassword = crypto.randomBytes(6).toString("hex"); // Ejemplo: "a3f9c1d2b4e5"
+      }
+
+      // Hashear contraseña
+      const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
       // Crear usuario
       const user = await User.create({
@@ -39,6 +43,7 @@ class UserService {
           name: user.name,
           email: user.email,
           user_type: user.user_type,
+          temporary_password: data.password ? undefined : plainPassword, // Solo la devolvemos si fue generada
         },
       };
     } catch (err) {
