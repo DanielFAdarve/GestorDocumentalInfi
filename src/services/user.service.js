@@ -72,7 +72,8 @@ class UserService {
 
     if (data.email) {
       const exists = await User.findOne({ where: { email: data.email } });
-      if (exists && exists.id !== id)
+      const userId = parseInt(id, 10); // convierte el id de string a number
+      if (exists && exists.id !== userId)
         return { success: false, message: "Email already in use" };
     }
 

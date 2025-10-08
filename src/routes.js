@@ -16,6 +16,7 @@ const app = express();
 // Configuración de CORS
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:4200'
 ];
 
 app.use(cors({
