@@ -41,8 +41,8 @@ async function seed() {
     // ===================
     // COMPANIES
     // ===================
-    const companyA = await Company.create({ name: "Tech Corp", tax_id: 123456789 });
-    const companyB = await Company.create({ name: "Biz Solutions", tax_id: 987654321 });
+    const companyA = await Company.create({ name: "Nexia", tax_id: 123456789 });
+    const companyB = await Company.create({ name: "Cyt", tax_id: 987654321 });
 
     // Link users to companies
     await UserCompany.create({ userId: admin.id, companyId: companyA.id });
@@ -52,8 +52,8 @@ async function seed() {
     // ===================
     // RESOLUTIONS
     // ===================
-    const resolution1 = await Resolution.create({ resolution_name: "Resolution A" });
-    const resolution2 = await Resolution.create({ resolution_name: "Resolution B" });
+    const resolution1 = await Resolution.create({ resolution_name: "secop_ii" });
+    const resolution2 = await Resolution.create({ resolution_name: "sia_observa" });
 
     // SUPPORTS
     await Support.create({ resolutionId: resolution1.id, support_name: "Financial Report", description: "Quarterly balance", delivery_term: 30 });
@@ -63,19 +63,24 @@ async function seed() {
     // ===================
     // ROLES
     // ===================
-    const supervisorRole = await Role.create({ name: "Supervisor", description: "Supervises contract execution" });
-    const operatorRole = await Role.create({ name: "Operator", description: "Executes tasks" });
+    const supervisorRole = await Role.create({ name: "Delegado", description: "Permite los permisos del administrador" });
+    const operatorRole = await Role.create({ name: "Modificador", description: "Permite modificar y cargar informacion sobre el contrato" });
+    const reeaderRole = await Role.create({ name: "Lectura", description: "Unicamente se le permite visualizar el contrato" });
+    
 
     // PERMISSIONS
-    const createPerm = await Permission.create({ permission_name: "create_support" });
-    const uploadPerm = await Permission.create({ permission_name: "upload_file" });
-    const approvePerm = await Permission.create({ permission_name: "approve_contract" });
+    const createPerm = await Permission.create({ permission_name: "manejar_contratos" });
+    const uploadPerm = await Permission.create({ permission_name: "subir_archivos" });
+    const approvePerm = await Permission.create({ permission_name: "aprobar_contratos" });
+    const readerPerm = await Permission.create({ permission_name: "lectura" });
 
     // ROLES ↔ PERMISSIONS
     await RolePermission.create({ roleId: supervisorRole.id, permissionId: approvePerm.id });
     await RolePermission.create({ roleId: supervisorRole.id, permissionId: uploadPerm.id });
     await RolePermission.create({ roleId: operatorRole.id, permissionId: uploadPerm.id });
     await RolePermission.create({ roleId: operatorRole.id, permissionId: createPerm.id });
+
+    await RolePermission.create({ roleId: reeaderRole.id, permissionId: readerPerm.id });
 
     // ===================
     // CONTRACTS
