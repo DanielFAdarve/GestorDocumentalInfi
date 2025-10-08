@@ -48,6 +48,15 @@ Permission.belongsToMany(User, { through: ContractPermission, foreignKey: "permi
 Contract.hasMany(ContractPermission, { foreignKey: "contractId" });
 ContractPermission.belongsTo(Contract, { foreignKey: "contractId" });
 
+// 🔹 Asociaciones directas necesarias para los include en UserContract
+UserContract.belongsTo(User, { foreignKey: "userId" });
+UserContract.belongsTo(Contract, { foreignKey: "contractId" });
+UserContract.belongsTo(Role, { foreignKey: "roleId" });
+
+// (opcional pero recomendado para navegación inversa)
+User.hasMany(UserContract, { foreignKey: "userId" });
+Contract.hasMany(UserContract, { foreignKey: "contractId" });
+Role.hasMany(UserContract, { foreignKey: "roleId" });
 
 // (async () => {
 //   try {

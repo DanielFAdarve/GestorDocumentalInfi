@@ -1,85 +1,92 @@
-const UserContractRole = require("../models/userContract.model");
+const UserContract = require("../models/userContract.model");
 const User = require("../models/user.model");
 const Contract = require("../models/contract.model");
 const Company = require("../models/company.model");
 const UserCompany = require("../models/userCompany.model");
+const Role = require("../models/role.model");
 
 class UserContractRoleService {
   async assignRoleToUser(data) {
     try {
-      const { user_id, contract_id, role } = data;
+      const { userId, contractId, roleId } = data;
 
-      if (!user_id || !contract_id || !role)
-        return { success: false, message: "user_id, contract_id and role are required" };
+      if (!userId || !contractId || !roleId)
+        return { success: false, message: "userId, contractId y roleId son requeridos" };
 
       // Validar usuario
-      const user = await User.findByPk(user_id);
-      if (!user) return { success: false, message: "User not found" };
+      const user = await User.findByPk(userId);
+      if (!user) return { success: false, message: "Usuario no encontrado" };
 
       // Validar contrato
-      const contract = await Contract.findByPk(contract_id);
-      if (!contract) return { success: false, message: "Contract not found" };
+      const contract = await Contract.findByPk(contractId);
+      if (!contract) return { success: false, message: "Contrato no encontrado" };
 
-      // Validar rol permitido
-      const validRoles = ["viewer", "editor", "manager", "admin"];
-      if (!validRoles.includes(role))
-        return { success: false, message: `Invalid role. Must be one of: ${validRoles.join(", ")}` };
+      // Validar rol
+      const role = await Role.findByPk(roleId);
+      if (!role) return { success: false, message: "Rol no válido" };
 
-      // Validar que usuario pertenezca a la empresa dueña del contrato
+      // Validar que usuario pertenezca a la empresa del contrato
       const belongs = await UserCompany.findOne({
-        where: { user_id, company_id: contract.company_id },
+        where: { userId, companyId: contract.companyId },
       });
       if (!belongs)
-        return { success: false, message: "User must belong to the contract's company" };
+        return { success: false, message: "El usuario no pertenece a la empresa dueña del contrato" };
 
       // Evitar duplicados
-      const exists = await UserContractRole.findOne({ where: { user_id, contract_id } });
-      if (exists) return { success: false, message: "User already has a role in this contract" };
+      const exists = await UserContract.findOne({ where: { userId, contractId } });
+      if (exists) return { success: false, message: "El usuario ya tiene un rol en este contrato" };
 
-      const relation = await UserContractRole.create(data);
+      // Crear la relación
+      const relation = await UserContract.create({ userId, contractId, roleId });
       return { success: true, data: relation };
     } catch (err) {
+      console.error(err);
       return { success: false, message: err.message };
     }
   }
 
   async getRolesByUser(userId) {
-    const roles = await UserContractRole.findAll({
-      where: { user_id: userId },
-      include: Contract,
+    const roles = await UserContract.findAll({
+      where: { userId },
+      include: [
+        { model: Contract },
+        { model: Role },
+      ],
     });
-    if (!roles.length) return { success: false, message: "No roles found for this user" };
+    if (!roles.length) return { success: false, message: "No se encontraron roles para este usuario" };
     return { success: true, data: roles };
   }
 
   async getUsersByContract(contractId) {
-    const roles = await UserContractRole.findAll({
-      where: { contract_id: contractId },
-      include: User,
+    const roles = await UserContract.findAll({
+      where: { contractId },
+      include: [
+        { model: User },
+        { model: Role },
+      ],
     });
-    if (!roles.length) return { success: false, message: "No users found for this contract" };
+    if (!roles.length) return { success: false, message: "No se encontraron usuarios para este contrato" };
     return { success: true, data: roles };
   }
 
-  async updateUserRole(userId, contractId, newRole) {
-    const relation = await UserContractRole.findOne({ where: { user_id: userId, contract_id: contractId } });
-    if (!relation) return { success: false, message: "Relation not found" };
+  async updateUserRole(userId, contractId, newRoleId) {
+    const relation = await UserContract.findOne({ where: { userId, contractId } });
+    if (!relation) return { success: false, message: "Relación no encontrada" };
 
-    const validRoles = ["viewer", "editor", "manager", "admin"];
-    if (!validRoles.includes(newRole))
-      return { success: false, message: `Invalid role. Must be one of: ${validRoles.join(", ")}` };
+    const role = await Role.findByPk(newRoleId);
+    if (!role) return { success: false, message: "Rol no válido" };
 
-    relation.role = newRole;
+    relation.roleId = newRoleId;
     await relation.save();
-    return { success: true, message: "Role updated", data: relation };
+    return { success: true, message: "Rol actualizado", data: relation };
   }
 
   async removeUserRole(userId, contractId) {
-    const relation = await UserContractRole.findOne({ where: { user_id: userId, contract_id: contractId } });
-    if (!relation) return { success: false, message: "Relation not found" };
+    const relation = await UserContract.findOne({ where: { userId, contractId } });
+    if (!relation) return { success: false, message: "Relación no encontrada" };
 
     await relation.destroy();
-    return { success: true, message: "User role removed from contract" };
+    return { success: true, message: "Rol de usuario eliminado del contrato" };
   }
 }
 
