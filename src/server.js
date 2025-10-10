@@ -51,7 +51,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Aquí cargas tus rutas
 const routes = require('./routes.js');
-app.use('/api', routes); // ejemplo de prefijo
+app.use(routes); // ejemplo de prefijo
 
 // Puerto
 const port = process.env.PORT || 3000;

@@ -5,20 +5,21 @@ const Company = require("../models/company.model");
 class UserCompanyService {
   async addUserToCompany(data) {
     try {
-      if (!data.user_id || !data.company_id)
+      console.log(data)
+      if (!data.userId || !data.companyId)
         return { success: false, message: "user_id and company_id are required" };
 
       // Validar existencia de usuario
-      const user = await User.findByPk(data.user_id);
+      const user = await User.findByPk(data.userId);
       if (!user) return { success: false, message: "User not found" };
 
       // Validar existencia de empresa
-      const company = await Company.findByPk(data.company_id);
+      const company = await Company.findByPk(data.companyId);
       if (!company) return { success: false, message: "Company not found" };
 
       // Evitar duplicados
       const exists = await UserCompany.findOne({
-        where: { user_id: data.user_id, company_id: data.company_id },
+        where: { userID: data.userId, companyID: data.companyId },
       });
       if (exists) return { success: false, message: "User already belongs to this company" };
 
@@ -47,6 +48,9 @@ class UserCompanyService {
 
     await relation.destroy();
     return { success: true, message: "User removed from company" };
+  }
+  async getAll() {
+    return await UserCompany.findAll();
   }
 }
 

@@ -20,6 +20,11 @@ class UserCompanyController {
     return res.json(Response.set(result.data));
   }
 
+  async getAllUserCompanies(req, res) {
+    const relations = await UserCompanyService.getAll(); // necesitas implementarlo
+    return res.json(Response.set(200, true, relations));
+  }
+
   async remove(req, res) {
     const result = await UserCompanyService.removeUserFromCompany(req.params.userId, req.params.companyId);
     if (!result.success) return res.status(404).json(Response.set(404, false, result.message));

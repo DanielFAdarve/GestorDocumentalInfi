@@ -10,10 +10,10 @@ class ContractService {
     if (!data.start_date || isNaN(Date.parse(data.start_date)))
       return { success: false, message: "Valid start_date is required" };
 
-    const company = await Company.findByPk(data.company_id);
+    const company = await Company.findByPk(data.companyId);
     if (!company) return { success: false, message: "Invalid company_id" };
 
-    const resolution = await Resolution.findByPk(data.resolution_id);
+    const resolution = await Resolution.findByPk(data.resolutionId);
     if (!resolution) return { success: false, message: "Invalid resolution_id" };
 
     const contract = await Contract.create(data);
@@ -40,7 +40,7 @@ class ContractService {
     }
 
     if (data.resolution_id) {
-      const resolution = await Resolution.findByPk(data.resolution_id);
+      const resolution = await Resolution.findByPk(data.resolutionId);
       if (!resolution) return { success: false, message: "Invalid resolution_id" };
     }
 
