@@ -12,6 +12,8 @@ const Role = require("./role.model");
 const Permission = require("./permission.model");
 const RolePermission = require("./rolePermission.model");
 const ContractPermission = require("./contractPermission.model");
+const ContractSupport = require("./contractSupport.model");
+const SupportHistory = require("./supportHistory.model");
 
 // Relaciones de las tablas
 User.belongsToMany(Company, { through: UserCompany, foreignKey: "userId" });
@@ -58,6 +60,25 @@ User.hasMany(UserContract, { foreignKey: "userId" });
 Contract.hasMany(UserContract, { foreignKey: "contractId" });
 Role.hasMany(UserContract, { foreignKey: "roleId" });
 
+// Contrato tiene varios soportes asociados (con responsable)
+Contract.hasMany(ContractSupport, { foreignKey: "contractId" });
+ContractSupport.belongsTo(Contract, { foreignKey: "contractId" });
+
+// Un soporte base puede tener varios soportes por contrato
+Support.hasMany(ContractSupport, { foreignKey: "supportId" });
+ContractSupport.belongsTo(Support, { foreignKey: "supportId" });
+
+// Un usuario puede ser responsable de varios soportes
+User.hasMany(ContractSupport, { foreignKey: "userId" });
+ContractSupport.belongsTo(User, { foreignKey: "userId" });
+
+// Histórico de versiones/cargas
+ContractSupport.hasMany(SupportHistory, { foreignKey: "contractSupportId" });
+SupportHistory.belongsTo(ContractSupport, { foreignKey: "contractSupportId" });
+
+// Un usuario puede generar varios registros históricos
+User.hasMany(SupportHistory, { foreignKey: "userId" });
+SupportHistory.belongsTo(User, { foreignKey: "userId" });
 // (async () => {
 //   try {
 //     await sequelize.sync({ force: true });
@@ -81,4 +102,6 @@ module.exports = {
   Permission,
   RolePermission,
   ContractPermission,
+  ContractSupport,
+  SupportHistory,
 };
