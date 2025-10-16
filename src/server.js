@@ -1,4 +1,4 @@
-/* const dotenv = require('dotenv');
+ const dotenv = require('dotenv');
 
 // Carga las rutas y express
 const app = require('./routes.js');
@@ -30,32 +30,32 @@ async function startServer() {
   }
 }
 
-startServer(); */
+startServer(); 
 
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
+// const express = require('express');
+// const cors = require('cors');
+// const dotenv = require('dotenv');
 
-dotenv.config();
+// dotenv.config();
 
-const app = express();
+// const app = express();
 
-// Habilitar CORS
-app.use(cors({
-  origin: 'http://localhost:4200', // permite tu frontend
-  credentials: true
-}));
+// // Habilitar CORS
+// app.use(cors({
+//   origin: 'http://localhost:4200', // permite tu frontend
+//   credentials: true
+// }));
 
-app.use(express.json()); // Para parsear JSON
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.json()); // Para parsear JSON
+// app.use(express.urlencoded({ extended: true }));
 
-// Aquí cargas tus rutas
-const routes = require('./routes.js');
-app.use(routes); // ejemplo de prefijo
+// // Aquí cargas tus rutas
+// const routes = require('./routes.js');
+// app.use(routes); // ejemplo de prefijo
 
-// Puerto
-const port = process.env.PORT || 3000;
+// // Puerto
+// const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
+// });
