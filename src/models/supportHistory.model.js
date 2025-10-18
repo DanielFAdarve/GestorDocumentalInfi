@@ -1,17 +1,21 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
+export default (sequelize, DataTypes) => {
+  const SupportHistory = sequelize.define('SupportHistory', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    supportUploadId: { type: DataTypes.INTEGER, allowNull: true },
+    contractSupportId: { type: DataTypes.INTEGER, allowNull: true },
+    usersContractId: { type: DataTypes.INTEGER, allowNull: true },
+    status: { type: DataTypes.STRING, defaultValue: 'pending' },
+    comment: { type: DataTypes.TEXT }
+  }, {
+    tableName: 'support_history',
+    timestamps: true
+  });
 
-const SupportHistory = sequelize.define("SupportHistory", {
-  id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
+  SupportHistory.associate = (models) => {
+    SupportHistory.belongsTo(models.SupportUpload, { foreignKey: 'supportUploadId' });
+    SupportHistory.belongsTo(models.ContractSupport, { foreignKey: 'contractSupportId' });
+    SupportHistory.belongsTo(models.UsersContracts, { foreignKey: 'usersContractId' });
+  };
 
-  contractSupportId: { type: DataTypes.BIGINT, allowNull: false },
-  userId: { type: DataTypes.BIGINT, allowNull: false },
-
-  file_hash: { type: DataTypes.STRING, allowNull: false },
-  comment: { type: DataTypes.TEXT, allowNull: true },
-}, {
-  tableName: "support_history",
-  timestamps: true
-});
-
-module.exports = SupportHistory;
+  return SupportHistory;
+};
