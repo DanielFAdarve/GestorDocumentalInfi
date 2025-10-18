@@ -1,14 +1,23 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
+export default (sequelize, DataTypes) => {
+  const UsersContracts = sequelize.define('UsersContracts', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    // roleId ya existirá y apunta a roles
+    createdBy: { type: DataTypes.INTEGER, allowNull: true },
+  }, {
+    tableName: 'users_contracts',
+    timestamps: true,
+    paranoid: true, // deletedAt
+    indexes: [
+      { unique: true, fields: ['userId', 'contractId'] }
+    ]
+  });
 
-const UserContract = sequelize.define("UserContract", {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  userId: { type: DataTypes.INTEGER, allowNull: false },
-  contractId: { type: DataTypes.INTEGER, allowNull: false },
-  roleId: { type: DataTypes.INTEGER, allowNull: false },
-}, {
-  tableName: "users_contracts",
-  timestamps: false,
-});
+  UsersContracts.associate = (models) => {
+    UsersContracts.belongsTo(models.User, { foreignKey: 'userId' });
+    UsersContracts.belongsTo(models.Contract, { foreignKey: 'contractId' });
+    UsersContracts.belongsTo(models.Role, { foreignKey: 'roleId' });
+    UsersContracts.belongsTo(models.User, { foreignKey: 'createdBy', as: 'creator' });
+  };
 
-module.exports = UserContract;
+  return UsersContracts;
+};

@@ -1,25 +1,15 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
+// usersCompany.model.js
+import { DataTypes, Model } from "sequelize";
 
-const UserCompany = sequelize.define("UserCompany", {
-  id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
-  userId: { type: DataTypes.BIGINT, allowNull: false },
-  companyId: { type: DataTypes.BIGINT, allowNull: false },
-  area: {
-    type: DataTypes.ENUM(
-      "administrativa",
-      "técnica",
-      "financiera",
-      "contable",
-      "legal",
-      "no_determinada"
-    ),
-    allowNull: false,
-    defaultValue: "no_determinada"
-  }
-}, {
-  tableName: "users_companies",
-  timestamps: false
-});
+export default (sequelize) => {
+  class UsersCompanies extends Model {}
 
-module.exports = UserCompany;
+  UsersCompanies.init(
+    {
+      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    },
+    { sequelize, modelName: "UsersCompanies", tableName: "users_companies", timestamps: true }
+  );
+
+  return UsersCompanies;
+};
