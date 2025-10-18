@@ -1,12 +1,15 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
+import { DataTypes, Model } from "sequelize";
 
-const Resolution = sequelize.define("Resolution", {
-  id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
-  resolution_name: { type: DataTypes.STRING, allowNull: false }
-}, {
-  tableName: "resolutions",
-  timestamps: false
-});
+export default (sequelize) => {
+  class Resolution extends Model {}
 
-module.exports = Resolution;
+  Resolution.init(
+    {
+      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+      resolution_name: { type: DataTypes.STRING, allowNull: false },
+    },
+    { sequelize, modelName: "Resolution", tableName: "resolutions", timestamps: true }
+  );
+
+  return Resolution;
+};
