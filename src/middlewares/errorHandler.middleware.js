@@ -1,4 +1,4 @@
-const Response = require('../models/Response.model');
+const Response = require('../database/models/Response.model');
 
 function errorHandler(err, req, res, next) {
   console.error('Error capturado por middleware:', err);

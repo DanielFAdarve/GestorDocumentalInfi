@@ -1,4 +1,4 @@
-const { Role } = require('../models');
+const { Role } = require('../database');
 
 class RoleService {
   // Crear un nuevo rol

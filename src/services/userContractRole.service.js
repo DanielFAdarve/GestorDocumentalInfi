@@ -1,9 +1,9 @@
-const UserContract = require("../models/userContract.model");
-const User = require("../models/user.model");
-const Contract = require("../models/contract.model");
-const Company = require("../models/company.model");
-const UserCompany = require("../models/userCompany.model");
-const Role = require("../models/role.model");
+const UserContract = require("../database/models/userContractRole.model");
+const User = require("../database/models/user.model");
+const Contract = require("../database/models/contract.model");
+const Company = require("../database/models/company.model");
+const UserCompany = require("../database/models/userCompanyRole.model");
+const Role = require("../database/models/role.model");
 
 class UserContractRoleService {
   async assignRoleToUser(data) {

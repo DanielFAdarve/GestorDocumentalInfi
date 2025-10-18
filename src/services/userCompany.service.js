@@ -1,4 +1,4 @@
-const UserCompany = require("../models/userCompany.model");
+const UserCompany = require("../models/userCompanyRole.model");
 const User = require("../models/user.model");
 const Company = require("../models/company.model");
 

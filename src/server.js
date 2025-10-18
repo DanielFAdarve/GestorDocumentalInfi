@@ -1,61 +1,48 @@
- const dotenv = require('dotenv');
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { sequelize } = require('./database');
+const app = require('./routes');
 
-// Carga las rutas y express
-const app = require('./routes.js');
-const { sequelize } = require('./models');
+const PORT = process.env.PORT || 3000;
 
+async function initializeDatabase() {
+  try {
+    // Verifica conexión
+    await sequelize.authenticate();
+    console.log('✅ Conexión a la base de datos establecida.');
 
-dotenv.config();
-
-// Validación del puerto
-const port = process.env.PORT || 3000;
-
+    // Sincroniza modelos (puedes cambiar force:true por alter:true en desarrollo)
+    await sequelize.sync({ force: true });
+    console.log('🗄️  Tablas sincronizadas correctamente.');
+  } catch (error) {
+    console.error('❌ Error en la sincronización de base de datos:', error);
+    process.exit(1);
+  }
+}
 
 async function startServer() {
   try {
-    await sequelize.authenticate(); // Verifica conexión
-    await sequelize.sync();         // Crea tablas si no existen
-    // await sequelize.sync({ force: true }).then(() => {
-    // console.log('Base de datos actualizada (alter: true)');
-    // });
+    // Inicializa middleware
+    const server = express();
 
+    server.use(cors({ origin: 'http://localhost:4200', credentials: true }));
+    server.use(express.json());
+    server.use(express.urlencoded({ extended: true }));
 
-    console.log('✅ Conexión establecida y tablas sincronizadas.');
+    // Cargar rutas
+    server.use('/api', app);
 
-    app.listen(port, () => {
-      console.log(`🚀 Servidor escuchando en http://localhost:${port}`);
+    // Inicializar DB
+    await initializeDatabase();
+
+    // Iniciar servidor
+    server.listen(PORT, () => {
+      console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
     });
   } catch (error) {
     console.error('❌ Error al iniciar el servidor:', error);
   }
 }
 
-startServer(); 
-
-// const express = require('express');
-// const cors = require('cors');
-// const dotenv = require('dotenv');
-
-// dotenv.config();
-
-// const app = express();
-
-// // Habilitar CORS
-// app.use(cors({
-//   origin: 'http://localhost:4200', // permite tu frontend
-//   credentials: true
-// }));
-
-// app.use(express.json()); // Para parsear JSON
-// app.use(express.urlencoded({ extended: true }));
-
-// // Aquí cargas tus rutas
-// const routes = require('./routes.js');
-// app.use(routes); // ejemplo de prefijo
-
-// // Puerto
-// const port = process.env.PORT || 3000;
-
-// app.listen(port, () => {
-//   console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
-// });
+startServer();
