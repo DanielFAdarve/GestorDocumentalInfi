@@ -9,12 +9,11 @@ const sequelize = new Sequelize({
 });
 
 const models = {};
-const modelsDir = path.join(__dirname, '../models');
+const modelsDir = path.join(__dirname, '../database/models');
 
 fs.readdirSync(modelsDir)
   .filter(file => file.endsWith('.js'))
   .forEach(file => {
-    if(file === 'Response.model.js') return; 
     const defineModel = require(path.join(modelsDir, file));
     const model = defineModel(sequelize);
     models[model.name] = model;

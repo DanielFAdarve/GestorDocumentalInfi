@@ -1,19 +1,32 @@
 const { Model, DataTypes } = require('sequelize');
+const bcrypt = require('bcryptjs');
 
 module.exports = (sequelize) => {
   class User extends Model {
+    // 🔐 Compara contraseñas
+    async validatePassword(password) {
+      return bcrypt.compare(password, this.password);
+    }
+
+    // 🚫 Oculta campos sensibles al devolver el usuario
+    toJSON() {
+      const values = { ...this.get() };
+      delete values.password;
+      return values;
+    }
+
     static associate(models) {
       // Relaciones N:N
       User.belongsToMany(models.Company, {
         through: models.UserCompanyRole,
         foreignKey: 'userId',
-        as: 'companies'
+        as: 'companies',
       });
 
       User.belongsToMany(models.Contract, {
         through: models.UserContractRole,
         foreignKey: 'userId',
-        as: 'contracts'
+        as: 'contracts',
       });
 
       // Relaciones directas
@@ -30,9 +43,30 @@ module.exports = (sequelize) => {
       password: { type: DataTypes.STRING, allowNull: false },
       user_type: { type: DataTypes.STRING },
       active: { type: DataTypes.BOOLEAN, defaultValue: true },
-      area: { type: DataTypes.STRING },
+      area: {
+        type: DataTypes.ENUM('administrativa', 'técnica', 'financiera', 'contable', 'legal', 'otra'),
+        allowNull: false,
+        defaultValue: 'otra',
+      },
     },
-    { sequelize, modelName: 'User', tableName: 'users', timestamps: true }
+    {
+      sequelize,
+      modelName: 'User',
+      tableName: 'users',
+      timestamps: true,
+      hooks: {
+        beforeCreate: async (user) => {
+          if (user.password) {
+            user.password = await bcrypt.hash(user.password, 10);
+          }
+        },
+        beforeUpdate: async (user) => {
+          if (user.changed('password')) {
+            user.password = await bcrypt.hash(user.password, 10);
+          }
+        },
+      },
+    }
   );
 
   return User;

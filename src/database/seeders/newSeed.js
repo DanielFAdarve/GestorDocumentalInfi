@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize');
-const db = require('../database/index.js');
+const db = require('../index.js');
 const bcrypt = require('bcrypt');
 
 const seedDatabase = async () => {
