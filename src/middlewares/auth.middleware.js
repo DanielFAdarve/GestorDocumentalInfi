@@ -1,23 +1,21 @@
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-dotenv.config();
+const AppError = require('../core/errors/AppError');
+const jwtHelper = require('../utils/jwt');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'daniel';
-
-const verifyToken = (req, res, next) => {
+function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+  const token = authHeader && authHeader.split(' ')[1];
 
-  if (!token) return res.status(401).json({ message: 'Token no proporcionado' });
+  if (!token) {
+    return next(new AppError('Token no proporcionado', 401));
+  }
 
-  jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Token inválido' });
+  const decoded = jwtHelper.verifyToken(token);
+  if (!decoded) {
+    return next(new AppError('Token inválido o expirado', 401));
+  }
 
-    req.user = user; 
-    next();
-  });
-};
+  req.user = decoded;
+  next();
+}
 
-module.exports = {
-  verifyToken
-};
+module.exports = authenticateToken;
