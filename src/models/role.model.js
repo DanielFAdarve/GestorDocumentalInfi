@@ -1,13 +1,16 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
+import { DataTypes, Model } from "sequelize";
 
-const Role = sequelize.define("Role", {
-  id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
-  name: { type: DataTypes.STRING, allowNull: false },
-  description: { type: DataTypes.STRING }
-}, {
-  tableName: "roles",
-  timestamps: false
-});
+export default (sequelize) => {
+  class Role extends Model {}
 
-module.exports = Role;
+  Role.init(
+    {
+      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+      name: { type: DataTypes.STRING, allowNull: false },
+      description: { type: DataTypes.STRING },
+    },
+    { sequelize, modelName: "Role", tableName: "roles", timestamps: true }
+  );
+
+  return Role;
+};
