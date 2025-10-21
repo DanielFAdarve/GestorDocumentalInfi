@@ -1,35 +1,56 @@
-const CompanyService = require("./company.service");
-const Response = require("../models/Response.model");
+const { createCompanySchema, updateCompanySchema } = require('./company.schema');
 
 class CompanyController {
-  async create(req, res) {
-    const result = await CompanyService.createCompany(req.body);
-    if (!result.success) return res.status(400).json(Response.set(400, false, result.message));
-    return res.json(Response.set(201, true, result.data));
+  constructor(companyService) {
+    this.companyService = companyService;
   }
 
-  async getAll(req, res) {
-    const companies = await CompanyService.getAllCompanies();
-    return res.json(Response.set(companies));
-  }
+  getAll = async (req, res, next) => {
+    try {
+      const companies = await this.companyService.getAllCompanies();
+      res.status(200).json(companies);
+    } catch (err) {
+      next(err);
+    }
+  };
 
-  async getById(req, res) {
-    const result = await CompanyService.getCompanyById(req.params.id);
-    if (!result.success) return res.status(404).json(Response.set(404, false, result.message));
-    return res.json(Response.set(result.data));
-  }
+  getById = async (req, res, next) => {
+    try {
+      const company = await this.companyService.getCompanyById(req.params.id);
+      res.status(200).json(company);
+    } catch (err) {
+      next(err);
+    }
+  };
 
-  async update(req, res) {
-    const result = await CompanyService.updateCompany(req.params.id, req.body);
-    if (!result.success) return res.status(400).json(Response.set(400, false, result.message));
-    return res.json(Response.set(200, true, result.data));
-  }
+  create = async (req, res, next) => {
+    try {
+      const validated = createCompanySchema.parse(req.body);
+      const company = await this.companyService.createCompany(validated);
+      res.status(201).json(company);
+    } catch (err) {
+      next(err);
+    }
+  };
 
-  async delete(req, res) {
-    const result = await CompanyService.deleteCompany(req.params.id);
-    if (!result.success) return res.status(404).json(Response.set(404, false, result.message));
-    return res.json(Response.set(200, true, result.message));
-  }
+  update = async (req, res, next) => {
+    try {
+      const validated = updateCompanySchema.parse(req.body);
+      const company = await this.companyService.updateCompany(req.params.id, validated);
+      res.status(200).json(company);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  delete = async (req, res, next) => {
+    try {
+      const result = await this.companyService.deleteCompany(req.params.id);
+      res.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
-module.exports = new CompanyController();
+module.exports = CompanyController;
