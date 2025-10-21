@@ -1,61 +1,30 @@
- const dotenv = require('dotenv');
+require('dotenv').config();
+const app = require('./app');
+const { sequelize } = require('./database');
+const {logger} = require('./core/logger');
 
-// Carga las rutas y express
-const app = require('./routes.js');
-const { sequelize } = require('./models');
+const PORT = process.env.PORT || 3000;
 
-
-dotenv.config();
-
-// Validación del puerto
-const port = process.env.PORT || 3000;
-
-
-async function startServer() {
+async function initializeDatabase() {
   try {
-    await sequelize.authenticate(); // Verifica conexión
-    await sequelize.sync();         // Crea tablas si no existen
-    // await sequelize.sync({ force: true }).then(() => {
-    // console.log('Base de datos actualizada (alter: true)');
-    // });
-
-
-    console.log('✅ Conexión establecida y tablas sincronizadas.');
-
-    app.listen(port, () => {
-      console.log(`🚀 Servidor escuchando en http://localhost:${port}`);
-    });
+    await sequelize.authenticate();
+    logger.info('✅ Conexión a la base de datos establecida.');
+    await sequelize.sync({ alter: false }); 
+    logger.info('🗄️  Tablas sincronizadas correctamente.');
   } catch (error) {
-    console.error('❌ Error al iniciar el servidor:', error);
+    logger.error('❌ Error en la sincronización de base de datos:', error);
+    process.exit(1);
   }
 }
 
-startServer(); 
+async function startServer() {
+  try {
+    await initializeDatabase();
+    app.listen(PORT, () => logger.info(`🚀 Servidor escuchando en http://localhost:${PORT}`));
+  } catch (error) {
+    logger.error('❌ Error al iniciar el servidor:', error);
+    process.exit(1);
+  }
+}
 
-// const express = require('express');
-// const cors = require('cors');
-// const dotenv = require('dotenv');
-
-// dotenv.config();
-
-// const app = express();
-
-// // Habilitar CORS
-// app.use(cors({
-//   origin: 'http://localhost:4200', // permite tu frontend
-//   credentials: true
-// }));
-
-// app.use(express.json()); // Para parsear JSON
-// app.use(express.urlencoded({ extended: true }));
-
-// // Aquí cargas tus rutas
-// const routes = require('./routes.js');
-// app.use(routes); // ejemplo de prefijo
-
-// // Puerto
-// const port = process.env.PORT || 3000;
-
-// app.listen(port, () => {
-//   console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
-// });
+startServer();
