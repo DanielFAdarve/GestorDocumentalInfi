@@ -1,60 +1,49 @@
-const Contract = require("../models/contract.model");
-const Company = require("../models/company.model");
-const Resolution = require("../models/resolution.model");
+const AppError = require('../../core/errors/AppError');
 
 class ContractService {
-  async createContract(data) {
-    if (!data.contract_number || !data.contract_number.trim())
-      return { success: false, message: "contract_number is required" };
-
-    if (!data.start_date || isNaN(Date.parse(data.start_date)))
-      return { success: false, message: "Valid start_date is required" };
-
-    const company = await Company.findByPk(data.companyId);
-    if (!company) return { success: false, message: "Invalid company_id" };
-
-    const resolution = await Resolution.findByPk(data.resolutionId);
-    if (!resolution) return { success: false, message: "Invalid resolution_id" };
-
-    const contract = await Contract.create(data);
-    return { success: true, data: contract };
+  constructor(contractRepository, sequelize) {
+    this.contractRepository = contractRepository;
+    this.sequelize = sequelize;
   }
 
   async getAllContracts() {
-    return await Contract.findAll({ include: [Company, Resolution] });
+    return this.contractRepository.findAll();
   }
 
   async getContractById(id) {
-    const contract = await Contract.findByPk(id, { include: [Company, Resolution] });
-    if (!contract) return { success: false, message: "Contract not found" };
-    return { success: true, data: contract };
+    const contract = await this.contractRepository.findById(id);
+    if (!contract) throw new AppError('Contrato no encontrado', 404);
+    return contract;
   }
 
-  async updateContract(id, data) {
-    const contract = await Contract.findByPk(id);
-    if (!contract) return { success: false, message: "Contract not found" };
+  async createContract(data) {
+    const transaction = await this.sequelize.transaction();
 
-    if (data.company_id) {
-      const company = await Company.findByPk(data.company_id);
-      if (!company) return { success: false, message: "Invalid company_id" };
+    try {
+      const contract = await this.contractRepository.create(data, transaction);
+
+      // Asignar automáticamente el usuario contratista con rol fijo 2
+      await this.contractRepository.assignUserRole(contract.id, data.userId, 2, transaction);
+
+      await transaction.commit();
+      return contract;
+    } catch (error) {
+      await transaction.rollback();
+      throw new AppError('Error al crear el contrato: ' + error.message, 500);
     }
+  }
 
-    if (data.resolution_id) {
-      const resolution = await Resolution.findByPk(data.resolutionId);
-      if (!resolution) return { success: false, message: "Invalid resolution_id" };
-    }
-
-    await contract.update(data);
-    return { success: true, data: contract };
+  async updateContract(id, updates) {
+    const contract = await this.contractRepository.update(id, updates);
+    if (!contract) throw new AppError('Contrato no encontrado', 404);
+    return contract;
   }
 
   async deleteContract(id) {
-    const contract = await Contract.findByPk(id);
-    if (!contract) return { success: false, message: "Contract not found" };
-
-    await contract.destroy();
-    return { success: true, message: "Contract deleted" };
+    const deleted = await this.contractRepository.delete(id);
+    if (!deleted) throw new AppError('Contrato no encontrado', 404);
+    return { message: 'Contrato eliminado correctamente' };
   }
 }
 
-module.exports = new ContractService();
+module.exports = ContractService;
