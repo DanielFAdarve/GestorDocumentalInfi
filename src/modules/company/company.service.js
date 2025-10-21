@@ -1,55 +1,37 @@
-const Company = require("../models/company.model");
+const AppError = require('../../core/errors/AppError');
 
 class CompanyService {
-  async createCompany(data) {
-    try {
-      if (!data.name || !data.name.trim())
-        return { success: false, message: "Company name is required" };
-
-      if (!data.tax_id || typeof data.tax_id !== "number")
-        return { success: false, message: "Valid tax_id (number) is required" };
-
-      const exists = await Company.findOne({ where: { tax_id: data.tax_id } });
-      if (exists) return { success: false, message: "Company with this tax_id already exists" };
-
-      const company = await Company.create(data);
-      return { success: true, data: company };
-    } catch (err) {
-      return { success: false, message: err.message };
-    }
+  constructor(companyRepository) {
+    this.companyRepository = companyRepository;
   }
 
   async getAllCompanies() {
-    return await Company.findAll();
+    return this.companyRepository.findAll();
   }
 
   async getCompanyById(id) {
-    const company = await Company.findByPk(id);
-    if (!company) return { success: false, message: "Company not found" };
-    return { success: true, data: company };
+    const company = await this.companyRepository.findById(id);
+    if (!company) throw new AppError('Empresa no encontrada', 404);
+    return company;
   }
 
-  async updateCompany(id, data) {
-    const company = await Company.findByPk(id);
-    if (!company) return { success: false, message: "Company not found" };
+  async createCompany(data) {
+    const existing = await this.companyRepository.findByName(data.name);
+    if (existing) throw new AppError('Ya existe una empresa con este nombre', 400);
+    return this.companyRepository.create(data);
+  }
 
-    if (data.tax_id) {
-      const exists = await Company.findOne({ where: { tax_id: data.tax_id } });
-      if (exists && exists.id !== id)
-        return { success: false, message: "Another company with this tax_id already exists" };
-    }
-
-    await company.update(data);
-    return { success: true, data: company };
+  async updateCompany(id, updates) {
+    const company = await this.companyRepository.update(id, updates);
+    if (!company) throw new AppError('Empresa no encontrada', 404);
+    return company;
   }
 
   async deleteCompany(id) {
-    const company = await Company.findByPk(id);
-    if (!company) return { success: false, message: "Company not found" };
-
-    await company.destroy();
-    return { success: true, message: "Company deleted" };
+    const deleted = await this.companyRepository.delete(id);
+    if (!deleted) throw new AppError('Empresa no encontrada', 404);
+    return { message: 'Empresa eliminada correctamente' };
   }
 }
 
-module.exports = new CompanyService();
+module.exports = CompanyService;
