@@ -21,6 +21,7 @@ module.exports = (sequelize) => {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       name: { type: DataTypes.STRING, allowNull: false },
       tax_id: { type: DataTypes.STRING },
+      active: { type: DataTypes.BOOLEAN, defaultValue: true },
     },
     { sequelize, modelName: 'Company', tableName: 'companies', timestamps: true }
   );
