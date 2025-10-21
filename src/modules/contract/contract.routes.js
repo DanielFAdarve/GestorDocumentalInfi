@@ -1,11 +1,15 @@
-const express = require("express");
-const router = express.Router();
-const ContractController = require("./contract.controller");
+const express = require('express');
+const ContractController = require('./contract.controller');
 
-router.post("/", ContractController.create);
-router.get("/", ContractController.getAll);
-router.get("/:id", ContractController.getById);
-router.put("/:id", ContractController.update);
-router.delete("/:id", ContractController.delete);
+module.exports = (contractService) => {
+  const router = express.Router();
+  const controller = new ContractController(contractService);
 
-module.exports = router;
+  router.get('/', controller.getAll);
+  router.get('/:id', controller.getById);
+  router.post('/', controller.create);
+  router.put('/:id', controller.update);
+  router.delete('/:id', controller.delete);
+
+  return router;
+};
