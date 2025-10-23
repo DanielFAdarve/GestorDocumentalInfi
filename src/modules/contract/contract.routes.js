@@ -6,10 +6,12 @@ module.exports = (contractService) => {
   const controller = new ContractController(contractService);
 
   router.get('/', controller.getAll);
+  router.get('/filter', controller.filter);
   router.get('/:id', controller.getById);
   router.post('/', controller.create);
   router.put('/:id', controller.update);
   router.delete('/:id', controller.delete);
+
 
   return router;
 };
