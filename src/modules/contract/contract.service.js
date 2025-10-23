@@ -18,7 +18,7 @@ class ContractService {
 
   async createContract(data) {
     const transaction = await this.sequelize.transaction();
-
+    console.log("Creating contract with data:", data);
     try {
       const contract = await this.contractRepository.create(data, transaction);
 
@@ -43,6 +43,11 @@ class ContractService {
     const deleted = await this.contractRepository.delete(id);
     if (!deleted) throw new AppError('Contrato no encontrado', 404);
     return { message: 'Contrato eliminado correctamente' };
+  }
+
+  async filterContracts(field, value) {
+    console.log(field, value);
+    return this.contractRepository.filter(field, value);
   }
 }
 
