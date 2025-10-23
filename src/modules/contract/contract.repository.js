@@ -5,11 +5,13 @@ class ContractRepository {
   }
 
   async findAll() {
-    return this.Contract.findAll({ include: ['company', 'resolution', 'users'] });
+    // return this.Contract.findAll({ include: ['company', 'resolution', 'users'] });
+        return this.Contract.findAll();
   }
 
   async findById(id) {
-    return this.Contract.findByPk(id, { include: ['company', 'resolution', 'users'] });
+    // return this.Contract.findByPk(id, { include: ['company', 'resolution', 'users'] });
+       return this.Contract.findByPk(id);
   }
 
   async create(contractData, transaction = null) {
@@ -34,6 +36,31 @@ class ContractRepository {
       { contractId, userId, roleId },
       { transaction }
     );
+  }
+
+  async filter(field, value) {
+    const allowedFields = [
+      'dependency',
+      'contract_number',
+      'contract_type',
+      'status',
+      'companyId',
+      'userId'
+    ];
+
+
+    if (!allowedFields.includes(field)) {
+      throw new Error(`Campo no permitido para filtrar: ${field}`);
+    }
+
+
+    const where = {};
+    where[field] = value;
+
+    return this.Contract.findAll({
+      where,
+      // include: ['company', 'resolution', 'users']
+    });
   }
 }
 
