@@ -1,6 +1,5 @@
 // services/userContractRoleService.js
-const AppError = require('../utils/AppError');
-
+const AppError = require('../../core/errors/AppError');
 class UserContractRoleService {
   constructor(userContractRoleRepository) {
     this.userContractRoleRepository = userContractRoleRepository;
