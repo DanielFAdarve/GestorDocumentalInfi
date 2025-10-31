@@ -35,6 +35,22 @@ class ContractController {
     }
   };
 
+    // Obtener contrato por ID
+  getByCompany = async (req, res, next) => {
+    try {
+      const contract = await this.contractService.getContractByCompanyId(req.params.id);
+      if (!contract) {
+        return res
+          .status(404)
+          .json(Response.error('Contrato no encontrado', 404));
+      }
+      res
+        .status(200)
+        .json(Response.success('Contrato obtenido correctamente', contract));
+    } catch (err) {
+      next(err);
+    }
+  };
   // Crear contrato
   create = async (req, res, next) => {
     try {

@@ -7,6 +7,7 @@ module.exports = (contractService) => {
 
   router.get('/', controller.getAll);
   router.get('/filter', controller.filter);
+  router.get('/company/:id', controller.getByCompany);
   router.get('/:id', controller.getById);
   router.post('/', controller.create);
   router.put('/:id', controller.update);

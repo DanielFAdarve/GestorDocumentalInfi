@@ -15,10 +15,14 @@ class ContractService {
     if (!contract) throw new AppError('Contrato no encontrado', 404);
     return contract;
   }
-
+  async getContractByCompanyId(id) {
+    const contract = await this.contractRepository.findByCompanyId(id);
+    if (!contract) throw new AppError('No hay contratos para la compañia relacionada', 404);
+    return contract;
+  }
   async createContract(data) {
     const transaction = await this.sequelize.transaction();
-    console.log("Creating contract with data:", data);
+    
     try {
       const contract = await this.contractRepository.create(data, transaction);
 
@@ -46,7 +50,6 @@ class ContractService {
   }
 
   async filterContracts(field, value) {
-    console.log(field, value);
     return this.contractRepository.filter(field, value);
   }
 }
