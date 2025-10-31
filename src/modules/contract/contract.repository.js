@@ -14,6 +14,12 @@ class ContractRepository {
        return this.Contract.findByPk(id);
   }
 
+   async findByCompanyId(id) {
+    // return this.Contract.findByPk(id, { include: ['company', 'resolution', 'users'] });
+       return this.Contract.findAll({where: { companyId: id }});
+  }
+
+
   async create(contractData, transaction = null) {
     return this.Contract.create(contractData, { transaction });
   }

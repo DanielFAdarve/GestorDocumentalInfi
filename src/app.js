@@ -18,7 +18,7 @@ const app = express();
 // ========================================================
 // 🌍 CONFIGURACIÓN DE CORS
 // ========================================================
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:4200'];
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:4200','https://lemon-desert-055e31c10.3.azurestaticapps.net'];
 
 app.use(
   cors({
@@ -49,6 +49,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // ========================================================
 // 🚏 RUTAS PRINCIPALES
 // ========================================================
+// app.use('/', apiRoutes);
 app.use('/api', apiRoutes);
 
 // ========================================================
