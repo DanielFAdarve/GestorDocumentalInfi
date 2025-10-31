@@ -18,11 +18,16 @@ const ContractService = require('../modules/contract/contract.service');
 const UserContractRepository = require('../modules/userContract/userContract.repository');
 const UserContractService = require('../modules/userContract/userContract.service');
 
+const EvidenceRepository = require('../modules/evidence/evidence.repository');
+const EvidenceService = require('../modules/evidence/evidence.service');
+
 // Importar rutas por módulo
 const userRoutes = require('../modules/user/user.routes');
 const companyRoutes = require('../modules/company/company.routes');
 const contractRoutes = require('../modules/contract/contract.routes');
 const userContractRoutes = require('../modules/userContract/userContract.routes');
+const EvidenceRoutes = require('../modules/evidence/evidence.routes');
+
 
 // Instancias e inyección de dependencias
 // User
@@ -41,10 +46,22 @@ const contractService = new ContractService(contractRepository, models.sequelize
 const userContractRepository = new UserContractRepository(models);
 const userContractService = new UserContractService(userContractRepository);
 
+//Evidences 
+const evidenceRepository = new EvidenceRepository({
+  SupportUpload: models.SupportUpload,
+  ContractSupport: models.ContractSupport,
+  Support: models.Support,
+  User: models.User,
+
+});
+
+const evidenceService = new EvidenceService(evidenceRepository);
+
 // Registrar rutas base
 router.use('/users', userRoutes(userService, JwtHelper));
 router.use('/companies', companyRoutes(companyService));
 router.use('/contracts', contractRoutes(contractService));
 router.use('/user-contract-roles', userContractRoutes(userContractService));
+router.use('/evidence', EvidenceRoutes(evidenceService));
 
 module.exports = router;
