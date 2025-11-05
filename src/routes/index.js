@@ -21,12 +21,21 @@ const UserContractService = require('../modules/userContract/userContract.servic
 const EvidenceRepository = require('../modules/evidence/evidence.repository');
 const EvidenceService = require('../modules/evidence/evidence.service');
 
+const SupportRepository = require('../modules/support/support.repository');
+const SupportService = require('../modules/support/support.service');
+
+const SupportValidationRepository = require('../modules/supportValidation/supportValidation.repository');
+const SupportValidationService = require('../modules/supportValidation/supportValidation.service');
+
+
 // Importar rutas por módulo
 const userRoutes = require('../modules/user/user.routes');
 const companyRoutes = require('../modules/company/company.routes');
 const contractRoutes = require('../modules/contract/contract.routes');
 const userContractRoutes = require('../modules/userContract/userContract.routes');
 const EvidenceRoutes = require('../modules/evidence/evidence.routes');
+const SupportRoutes = require('../modules/support/support.routes');
+const SupportValidationRoutes = require('../modules/supportValidation/supportValidation.routes');
 
 
 // Instancias e inyección de dependencias
@@ -57,11 +66,36 @@ const evidenceRepository = new EvidenceRepository({
 
 const evidenceService = new EvidenceService(evidenceRepository);
 
+// Supports
+const supportRepository = new SupportRepository({
+  ContractSupport: models.ContractSupport,
+  Support: models.Support,
+  SupportUpload: models.SupportUpload,
+  SupportHistory: models.SupportHistory,
+  UserContractRole: models.UserContractRole,
+  User: models.User,
+});
+const supportService = new SupportService(supportRepository);
+
+//support validation
+const supportValidationRepository = new SupportValidationRepository({
+  Contract: models.Contract,
+  Resolution: models.Resolution,
+  ResolutionSupport: models.ResolutionSupport,
+  Support: models.Support,
+  ContractSupport: models.ContractSupport,
+});
+const supportValidationService = new SupportValidationService(supportValidationRepository);
+
+
+
 // Registrar rutas base
 router.use('/users', userRoutes(userService, JwtHelper));
 router.use('/companies', companyRoutes(companyService));
 router.use('/contracts', contractRoutes(contractService));
 router.use('/user-contract-roles', userContractRoutes(userContractService));
 router.use('/evidence', EvidenceRoutes(evidenceService));
+router.use('/supports', SupportRoutes(supportService));
+router.use('/support-validation', SupportValidationRoutes(supportValidationService));
 
 module.exports = router;

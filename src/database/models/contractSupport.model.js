@@ -11,6 +11,11 @@ module.exports = (sequelize) => {
         foreignKey: 'contractSupportId',
         as: 'history'
       });
+      
+       ContractSupport.hasMany(models.SupportUpload, {
+        foreignKey: 'contractSupportId',
+        as: 'uploads',
+      });
     }
   }
 
