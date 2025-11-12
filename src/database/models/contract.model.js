@@ -50,6 +50,13 @@ module.exports = (sequelize) => {
       comment: { type: DataTypes.TEXT, allowNull: true },
       resolutionId: { type: DataTypes.INTEGER, allowNull: true },
       responsibilities: { type: DataTypes.TEXT, allowNull: true },
+      future_validity: { type: DataTypes.BOOLEAN, allowNull: true },
+      liquidation: { type: DataTypes.BOOLEAN, allowNull: true },
+      enviromental_obligations: { type: DataTypes.BOOLEAN, allowNull: true },
+      consumption_obligations: { type: DataTypes.BOOLEAN, allowNull: true },
+      reservation: { type: DataTypes.BOOLEAN, allowNull: true },
+      secop_contract: { type: DataTypes.TEXT, allowNull: true },
+      status_secop: { type: DataTypes.TEXT, allowNull: true },
     },
     {
       sequelize,

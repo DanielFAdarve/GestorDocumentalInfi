@@ -18,6 +18,13 @@ const createContractSchema = z.object({
   comment: z.string().optional(),
   resolutionId: z.number().optional(),
   responsibilities: z.string().optional(),
+  future_validity: z.boolean().optional().default(false),
+  liquidation: z.boolean().optional().default(false),
+  enviromental_obligations: z.boolean().optional().default(false),
+  consumption_obligations: z.boolean().optional().default(false),
+  reservation: z.boolean().optional().default(false),
+  secop_contract: z.string().optional(),
+  status_secop: z.string().optional().default('Pendiente_Creacion'),
 });
 
 const updateContractSchema = createContractSchema.partial();
