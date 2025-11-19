@@ -41,6 +41,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(httpLogger); // Morgan + Winston
 
+const auditMiddleware = require('./middlewares/audit.middleware');
+app.use(auditMiddleware);
+
 // ========================================================
 // 📘 DOCUMENTACIÓN SWAGGER
 // ========================================================

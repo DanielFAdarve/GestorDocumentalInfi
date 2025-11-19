@@ -36,6 +36,7 @@ const userContractRoutes = require('../modules/userContract/userContract.routes'
 const EvidenceRoutes = require('../modules/evidence/evidence.routes');
 const SupportRoutes = require('../modules/support/support.routes');
 const SupportValidationRoutes = require('../modules/supportValidation/supportValidation.routes');
+const auditRoutes = require('../modules/audit/audit.routes');
 
 
 // Instancias e inyección de dependencias
@@ -97,5 +98,6 @@ router.use('/user-contract-roles', userContractRoutes(userContractService));
 router.use('/evidence', EvidenceRoutes(evidenceService));
 router.use('/supports', SupportRoutes(supportService));
 router.use('/support-validation', SupportValidationRoutes(supportValidationService));
+router.use('/audit', auditRoutes);
 
 module.exports = router;
