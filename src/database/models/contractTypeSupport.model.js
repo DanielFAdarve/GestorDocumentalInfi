@@ -10,16 +10,27 @@ module.exports = (sequelize) => {
 
   ContractTypeSupport.init({
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
     contract_type_id: { type: DataTypes.INTEGER, allowNull: false },
     support_id: { type: DataTypes.INTEGER, allowNull: false },
-    // etapa: pre_contractual | contractual
+
     stage: { type: DataTypes.ENUM('pre_contractual','contractual'), allowNull: false },
-    // si es obligatorio por defecto para este tipo
+
+    // NUEVOS
     is_required: { type: DataTypes.BOOLEAN, defaultValue: true },
-    // orden de presentación/validación
-    order: { type: DataTypes.INTEGER, defaultValue: 0 }
+    order: { type: DataTypes.INTEGER, defaultValue: 0 },
+
+    // validación de vigencias según matriz
+    max_days_old: { type: DataTypes.INTEGER, allowNull: true }, // ejemplo: "no mayor a 30 días"
+    enforce_expiration: { type: DataTypes.BOOLEAN, defaultValue: false }, // si debe controlar vencimiento
+    expiration_days: { type: DataTypes.INTEGER, allowNull: true }, // válido si enforce_expiration = true
+
   }, {
-    sequelize, modelName: 'ContractTypeSupport', tableName: 'contract_type_supports', timestamps: false, underscored: true,
+    sequelize,
+    modelName: 'ContractTypeSupport',
+    tableName: 'contract_type_supports',
+    timestamps: false,
+    underscored: true,
     indexes: [
       { fields: ['contract_type_id'] },
       { fields: ['support_id'] }
