@@ -27,6 +27,8 @@ const SupportService = require('../modules/support/support.service');
 const SupportValidationRepository = require('../modules/supportValidation/supportValidation.repository');
 const SupportValidationService = require('../modules/supportValidation/supportValidation.service');
 
+const SupportManagerRepository = require('../modules/support_manager/supportManager.repository');
+const SupportManagerService = require('../modules/support_manager/supportManager.service');
 
 // Importar rutas por módulo
 const userRoutes = require('../modules/user/user.routes');
@@ -37,7 +39,7 @@ const EvidenceRoutes = require('../modules/evidence/evidence.routes');
 const SupportRoutes = require('../modules/support/support.routes');
 const SupportValidationRoutes = require('../modules/supportValidation/supportValidation.routes');
 const auditRoutes = require('../modules/audit/audit.routes');
-
+const supportManagerRoutesFactory = require('../modules/support_manager/supportManager.routes');
 
 // Instancias e inyección de dependencias
 // User
@@ -89,6 +91,21 @@ const supportValidationRepository = new SupportValidationRepository({
 const supportValidationService = new SupportValidationService(supportValidationRepository);
 
 
+// instancias (usa tus modelos existentes)
+const supportManagerRepository = new SupportManagerRepository(models);
+    
+
+const supportManagerService = new SupportManagerService( supportManagerRepository,models, models.sequelize);
+
+
+const NotificationService = require("../modules/notification/notification.service");
+const NotificationController = require("../modules/notification/notification.controller");
+const notificationRoutes = require("../modules/notification/notification.routes");
+
+const notificationService = new NotificationService(models);
+const notificationController = new NotificationController(notificationService);
+
+
 
 // Registrar rutas base
 router.use('/users', userRoutes(userService, JwtHelper));
@@ -99,5 +116,7 @@ router.use('/evidence', EvidenceRoutes(evidenceService));
 router.use('/supports', SupportRoutes(supportService));
 router.use('/support-validation', SupportValidationRoutes(supportValidationService));
 router.use('/audit', auditRoutes);
+router.use('/supports-manager', supportManagerRoutesFactory(supportManagerService));
+router.use("/notifications", notificationRoutes(notificationController));
 
 module.exports = router;

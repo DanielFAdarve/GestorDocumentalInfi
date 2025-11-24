@@ -23,6 +23,7 @@
     "jsdom": "^26.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
+    "nodemailer": "^7.0.10",
     "nodemon": "^3.1.9",
     "pdf-lib": "^1.17.1",
     "pg": "^8.16.3",
