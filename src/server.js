@@ -9,7 +9,7 @@ async function initializeDatabase() {
   try {
     await sequelize.authenticate();
     logger.info('✅ Conexión a la base de datos establecida.');
-    await sequelize.sync({ force: false }); 
+    await sequelize.sync({ alter: false }); 
     logger.info('🗄️  Tablas sincronizadas correctamente.');
   } catch (error) {
     logger.error('❌ Error en la sincronización de base de datos:', error);
