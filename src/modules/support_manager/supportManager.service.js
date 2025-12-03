@@ -96,39 +96,39 @@ class SupportService {
       const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
 
       // 4. Crear metadata
-      const upload = await this.repo.createUpload({
-        contract_support_id: contractSupportId,
-        users_contract_role_id: payload.uploaderUserContractRoleId,
-        created_by: creatorUserId,
-        file_name: "payload.fileName",
-        mime_type: payload.mimeType || null,
-
-        file_hash: "1",
-        azure_container: "process.env.AZURE_SHARE_NAME",
-        azure_blob_path: "1",
-        azure_url: azureUrl,
-
-        comment: payload.comment || null,
-        uploaded_at: new Date()
-
-      }, transaction);
-
-      //  const upload = await this.repo.createUpload({
+      // const upload = await this.repo.createUpload({
       //   contract_support_id: contractSupportId,
       //   users_contract_role_id: payload.uploaderUserContractRoleId,
       //   created_by: creatorUserId,
-      //   file_name: payload.fileName,
+      //   file_name: "payload.fileName",
       //   mime_type: payload.mimeType || null,
 
-      //   file_hash: fileHash,
-      //   azure_container: process.env.AZURE_SHARE_NAME,
-      //   azure_blob_path: remotePath,
+      //   file_hash: "1",
+      //   azure_container: "process.env.AZURE_SHARE_NAME",
+      //   azure_blob_path: "1",
       //   azure_url: azureUrl,
 
       //   comment: payload.comment || null,
       //   uploaded_at: new Date()
 
       // }, transaction);
+
+       const upload = await this.repo.createUpload({
+        contract_support_id: contractSupportId,
+        users_contract_role_id: payload.uploaderUserContractRoleId,
+        created_by: creatorUserId,
+        file_name: payload.fileName,
+        mime_type: payload.mimeType || null,
+
+        file_hash: fileHash,
+        azure_container: process.env.AZURE_SHARE_NAME,
+        azure_blob_path: remotePath,
+        azure_url: azureUrl,
+
+        comment: payload.comment || null,
+        uploaded_at: new Date()
+
+      }, transaction);
       // 5. Historial
       await this.repo.createHistory({
         contract_support_id: contractSupportId,
