@@ -12,8 +12,11 @@ const UserService = require('../modules/user/user.service');
 const CompanyRepository = require('../modules/company/company.repository');
 const CompanyService = require('../modules/company/company.service');
 
-const ContractRepository = require('../modules/contract/contract.repository');
-const ContractService = require('../modules/contract/contract.service');
+// const ContractRepository = require('../modules/contract/contract.repository');
+// const ObligationRepository = require('../modules/contract/contractObligation.repository');
+// const FileRepository = require('../modules/contract/contractFile.repository');
+// const ContractService = require('../modules/contract/contract.service');
+
 
 const UserContractRepository = require('../modules/userContract/userContract.repository');
 const UserContractService = require('../modules/userContract/userContract.service');
@@ -50,9 +53,18 @@ const userService = new UserService(userRepository);
 const companyRepository = new CompanyRepository(models.Company);
 const companyService = new CompanyService(companyRepository);
 
-// Contract
-const contractRepository = new ContractRepository(models.Contract, models.UserContractRole);
-const contractService = new ContractService(contractRepository, models.sequelize);
+// // Contract
+// const contractRepository = new ContractRepository(models.Contract, models.UserContractRole);
+// const obligationRepository = new ObligationRepository(models.Obligation);
+// const fileRepository = new FileRepository(models.ContractFile);
+
+// const contractService = new ContractService(contractRepository, models.sequelize);
+// const contractService = new ContractService(
+//   contractRepository,
+//   obligationRepository,
+//   fileRepository,
+//   models.sequelize
+// );
 
 // UserContract
 const userContractRepository = new UserContractRepository(models);
@@ -106,11 +118,28 @@ const notificationService = new NotificationService(models);
 const notificationController = new NotificationController(notificationService);
 
 
+const ContractManagerRepository = require('../modules/contract_manager/contract.repository');
+const ObligationRepository = require('../modules/contract_manager/obligation.repository');
+const FileRepository = require('../modules/contract_manager/file.repository');
+const ContractManagerService = require('../modules/contract_manager/contract.service');
+const contractManagerRoutesFactory = require('../modules/contract_manager/contract.routes');
+
+// Instanciación
+const contractManagerRepository = new ContractManagerRepository(models.Contract, models.UserContractRole);
+const ObligationManagerRepository = new ObligationRepository(models);
+const FileManagerRepository = new FileRepository(models);
+const contractManagerService = new ContractManagerService(
+  contractManagerRepository,
+  ObligationManagerRepository,
+  FileManagerRepository,
+  models.sequelize
+);
 
 // Registrar rutas base
 router.use('/users', userRoutes(userService, JwtHelper));
 router.use('/companies', companyRoutes(companyService));
-router.use('/contracts', contractRoutes(contractService));
+// router.use('/contracts', contractRoutes(contractService));
+router.use('/contracts', contractManagerRoutesFactory(contractManagerService));
 router.use('/user-contract-roles', userContractRoutes(userContractService));
 router.use('/evidence', EvidenceRoutes(evidenceService));
 router.use('/supports', SupportRoutes(supportService));
