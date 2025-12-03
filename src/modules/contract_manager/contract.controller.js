@@ -1,4 +1,4 @@
-// src/modules/contract/contract.controller.js
+const Response = require('../../core/models/Response.model');
 
 class ContractController {
   constructor(contractService) {
@@ -7,8 +7,11 @@ class ContractController {
 
   getAll = async (req, res, next) => {
     try {
-      const data = await this.contractService.getAll();
-      res.json(data);
+      const result = await this.contractService.getAll();
+      if (!result.success) {
+        return res.status(400).json(Response.error(result.message));
+      }
+      res.status(200).json(Response.success('Contratos obtenidos correctamente', result.data));
     } catch (err) {
       next(err);
     }
@@ -16,8 +19,13 @@ class ContractController {
 
   getById = async (req, res, next) => {
     try {
-      const data = await this.contractService.getById(req.params.id);
-      res.json(data);
+      const { id } = req.params;
+      const result = await this.contractService.getById(id);
+
+      if (!result.success) {
+        return res.status(404).json(Response.error(result.message));
+      }
+      res.status(200).json(Response.success('Contrato obtenido correctamente', result.data));
     } catch (err) {
       next(err);
     }
@@ -25,8 +33,12 @@ class ContractController {
 
   create = async (req, res, next) => {
     try {
-      const data = await this.contractService.createContract(req.body);
-      res.status(201).json(data);
+      const result = await this.contractService.createContract(req.body);
+
+      if (!result.success) {
+        return res.status(400).json(Response.error(result.message));
+      }
+      res.status(201).json(Response.success('Contrato creado correctamente', result.data));
     } catch (err) {
       next(err);
     }
@@ -34,8 +46,13 @@ class ContractController {
 
   update = async (req, res, next) => {
     try {
-      await this.contractService.updateContract(req.params.id, req.body);
-      res.json({ message: "Contrato actualizado" });
+      const { id } = req.params;
+      const result = await this.contractService.updateContract(id, req.body);
+
+      if (!result.success) {
+        return res.status(400).json(Response.error(result.message));
+      }
+      res.status(200).json(Response.success('Contrato actualizado correctamente', result.data));
     } catch (err) {
       next(err);
     }
@@ -43,8 +60,27 @@ class ContractController {
 
   delete = async (req, res, next) => {
     try {
-      await this.contractService.deleteContract(req.params.id);
-      res.json({ message: "Contrato eliminado" });
+      const { id } = req.params;
+      const result = await this.contractService.deleteContract(id);
+
+      if (!result.success) {
+        return res.status(404).json(Response.error(result.message));
+      }
+      res.status(200).json(Response.success('Contrato eliminado correctamente', null));
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  filter = async (req, res, next) => {
+    try {
+      const { field, value } = req.query;
+      const result = await this.contractService.filter(field, value);
+
+      if (!result.success) {
+        return res.status(400).json(Response.error(result.message));
+      }
+      res.status(200).json(Response.success('Filtros aplicados correctamente', result.data));
     } catch (err) {
       next(err);
     }

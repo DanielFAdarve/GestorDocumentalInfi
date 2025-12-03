@@ -1,4 +1,5 @@
 // src/modules/contract/contract.repository.js
+const { Op } = require('sequelize');
 
 class ContractRepository {
   constructor(Contract, UserContractRole) {
@@ -6,9 +7,20 @@ class ContractRepository {
     this.UserContractRole = UserContractRole;
   }
 
+  async filter(field, value) {
+    return this.Contract.findAll({
+      where: {
+        [field]: {
+          [Op.like]: `%${value}%`
+        }
+      }
+    });
+  }
+  
   async findAll() {
     return this.Contract.findAll({
-      include: [{ model: this.UserContractRole, as: "userContractRoles" }],
+      // include: [{ model: this.UserContractRole, as: "userContractRoles" }],
+
     });
   }
 
