@@ -9,19 +9,19 @@ class EvidenceRepository {
   /**
    * Obtiene las evidencias con estado "pending" para un contrato.
    */
-  async findPendingByContract(contractId) {
+  async findPendingByContract(contract_id) {
     return this.SupportUpload.findAll({
       include: [
         {
           model: this.ContractSupport,
           as: 'contractSupport',
           required: true,
-          where: { contractId },
+          where: { contract_id },
           include: [
             {
               model: this.Support,
               as: 'support',
-              attributes: ['id', 'support_name', 'description'],
+              attributes: ['id', 'name', 'description'],
             },
           ],
         },

@@ -8,18 +8,18 @@ class SupportRepository {
         this.User = User;
     }
 
-    async findSupportsByContract(contractId) {
+    async findSupportsByContract(contract_id) {
         return this.ContractSupport.findAll({
-            where: { contractId },
+            where: { contract_id },
             include: [
                 {
                     model: this.Support,
                     as: 'support',
-                    attributes: ['id', 'support_name', 'description', 'delivery_term'],
+                    attributes: ['id', 'name', 'description', 'delivery_term_days'],
                 },
                 {
                     model: this.SupportUpload,
-                    as: 'upload',
+                    as: 'uploads',
                     include: [{ model: this.User, as: 'creator', attributes: ['id', 'name', 'email'] }],
                 },
             ],
