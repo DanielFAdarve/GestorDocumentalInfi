@@ -135,6 +135,11 @@ const contractManagerService = new ContractManagerService(
   models.sequelize
 );
 
+const ReportService = require('../modules/report/report.service');
+const reportRoutes = require('../modules/report/report.routes');
+const reportService = new ReportService(models);
+
+
 // Registrar rutas base
 router.use('/users', userRoutes(userService, JwtHelper));
 router.use('/companies', companyRoutes(companyService));
@@ -147,5 +152,6 @@ router.use('/support-validation', SupportValidationRoutes(supportValidationServi
 router.use('/audit', auditRoutes);
 router.use('/supports-manager', supportManagerRoutesFactory(supportManagerService));
 router.use("/notifications", notificationRoutes(notificationController));
+router.use('/reports', reportRoutes(reportService));
 
 module.exports = router;
