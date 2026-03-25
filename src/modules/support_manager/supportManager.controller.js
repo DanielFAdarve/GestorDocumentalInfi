@@ -13,7 +13,7 @@ class SupportController {
 
             const validated = uploadEvidenceSchema.parse(req.body);
             const creatorUserId = req.user?.id || null;
-            
+
             const result = await this.service.uploadEvidenceIntegrated(
                 contractSupportId,
                 validated,
@@ -107,6 +107,20 @@ class SupportController {
             const updated = await this.service.updateUploadPortalStatus(uploadId, { secop_status, sia_status }, actorId);
             return res.status(200).json(Response.success('Portal status actualizado', updated));
         } catch (err) { next(err); }
+    };
+    getEvidenceBase64 = async (req, res, next) => {
+        try {
+            const { contractSupportId } = req.params;
+
+            const result = await this.service.getEvidenceBase64(contractSupportId);
+
+            return res
+                .status(200)
+                .json(Response.success('Archivo en base64 obtenido', result));
+
+        } catch (err) {
+            next(err);
+        }
     };
 }
 
