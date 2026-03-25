@@ -1,6 +1,8 @@
 const AppError = require('../../core/errors/AppError');
 const { uploadBase64ToAzure } = require('../../utils/azureUpload');
 const crypto = require("crypto");
+const { downloadFromAzure } = require('../../utils/azureDownload');
+
 
 class SupportService {
   constructor(supportRepository, models, sequelize) {
@@ -9,54 +11,41 @@ class SupportService {
 
     this.sequelize = sequelize;
   }
-  //Carga integrada con historico 
-  // async uploadEvidenceIntegrated(contractSupportId, payload, creatorUserId) {
-  //   const transaction = await this.sequelize.transaction();
 
-  //   try {
-  //     // 1. Validar ContractSupport
-  //     const cs = await this.models.ContractSupport.findByPk(contractSupportId);
-  //     if (!cs) throw new AppError('ContractSupport no encontrado', 404);
+  async getEvidenceBase64(contractSupportId) {
+    // 1. Buscar uploads
+    const uploads = await this.repo.findUploadsByContractSupport(contractSupportId);
 
-  //     // 2. Subir archivo a Azure
-  //     const remotePath = `supports/${contractSupportId}/${Date.now()}_${payload.fileName}`;
-  //     const azureUrl = await uploadBase64ToAzure(payload.fileBase64, remotePath);
+    if (!uploads || uploads.length === 0) {
+      throw new AppError('No hay archivos para este ContractSupport', 404);
+    }
 
-  //     // 3. Crear metadata en BD
-  //     const upload = await this.repo.createUpload(
-  //       {
-  //         contract_support_id: contractSupportId,
-  //         users_contract_role_id: payload.uploaderUserContractRoleId,
-  //         created_by: creatorUserId,
-  //         file_name: payload.fileName,
-  //         mime_type: payload.mimeType || null,
-  //         azure_url: azureUrl,
-  //         comment: payload.comment || null,
-  //         uploaded_at: new Date()
-  //       },
-  //       transaction
-  //     );
+    // Puedes traer el más reciente
+    const latest = uploads[0];
 
-  //     // 4. Registrar history
-  //     await this.repo.createHistory(
-  //       {
-  //         contract_support_id: contractSupportId,
-  //         support_upload_id: upload.id,
-  //         event: 'upload_created',
-  //         actor_user_id: creatorUserId,
-  //         payload: { file_name: payload.fileName }
-  //       },
-  //       transaction
-  //     );
+    if (!latest.azure_blob_path) {
+      throw new AppError('El upload no tiene ruta en Azure', 400);
+    }
 
-  //     await transaction.commit();
-  //     return upload;
+    // 2. Descargar archivo desde Azure
+    const fileBuffer = await downloadFromAzure(
+      latest.azure_blob_path,
+      latest.azure_container
+    );
 
-  //   } catch (err) {
-  //     await transaction.rollback();
-  //     throw err;
-  //   }
-  // }
+    if (!fileBuffer) {
+      throw new AppError('No se pudo descargar el archivo desde Azure', 500);
+    }
+
+    // 3. Convertir a base64
+    const base64 = fileBuffer.toString('base64');
+
+    return {
+      fileName: latest.file_name,
+      mimeType: latest.mime_type,
+      base64
+    };
+  }
   async uploadEvidenceIntegrated(contractSupportId, payload, creatorUserId) {
     const transaction = await this.sequelize.transaction();
 
@@ -113,7 +102,7 @@ class SupportService {
 
       // }, transaction);
 
-       const upload = await this.repo.createUpload({
+      const upload = await this.repo.createUpload({
         contract_support_id: contractSupportId,
         users_contract_role_id: payload.uploaderUserContractRoleId,
         created_by: creatorUserId,
@@ -146,119 +135,7 @@ class SupportService {
       throw err;
     }
   }
-  // async uploadEvidenceIntegrated(contractSupportId, payload, creatorUserId) {
-  //   const transaction = await this.sequelize.transaction();
 
-  //   try {
-  //     // =============================
-  //     // 1. Suavizar validaciones
-  //     // =============================
-  //     const safePayload = payload || {};
-
-  //     const safeFileName = safePayload.fileName || "archivo_default.pdf";
-  //     const safeBase64 = safePayload.fileBase64 || Buffer.from("VACIO").toString("base64");
-  //     const safeMime = safePayload.mimeType || "application/octet-stream";
-
-  //     const safeUploaderRoleId =
-  //       safePayload.uploaderUserContractRoleId || 1; // valor por defecto
-
-  //     const safeCreator =
-  //       creatorUserId || 1; // por si viene null
-
-  //     const container =
-  //       process.env.AZURE_SHARE_NAME || "default_container";
-
-  //     // =============================
-  //     // 2. Validar contract_support
-  //     // =============================
-  //     const cs = await this.models.ContractSupport.findByPk(contractSupportId);
-  //     if (!cs) throw new AppError("ContractSupport no encontrado", 404);
-
-  //     // =============================
-  //     // 3. Subida a Azure (si falla, no frena)
-  //     // =============================
-  //     let remotePath = `supports/${contractSupportId}/${Date.now()}_${safeFileName}`;
-  //     let azureUrl = null;
-
-  //     try {
-  //       azureUrl = await uploadBase64ToAzure(safeBase64, remotePath);
-  //     } catch (err) {
-  //       // NO hacemos throw → cargamos igual
-  //       remotePath = "default_path";
-  //       azureUrl = "https://fake-url.local/default.pdf";
-  //     }
-
-  //     // =============================
-  //     // 4. Generar hash (o default)
-  //     // =============================
-  //     let fileHash = "hash_default";
-  //     try {
-  //       const buffer = Buffer.from(safeBase64, "base64");
-  //       fileHash = crypto.createHash("sha256").update(buffer).digest("hex");
-  //     } catch (_) { }
-
-  //     let data=  {
-  //         contract_support_id: contractSupportId,
-  //         users_contract_role_id: safeUploaderRoleId,
-  //         created_by: safeCreator,
-
-  //         file_name: safeFileName,
-  //         mime_type: safeMime,
-
-  //         file_hash: fileHash,
-  //         azure_container: container,
-  //         azure_blob_path: remotePath,
-  //         azure_url: azureUrl,
-
-  //         comment: safePayload.comment || null,
-  //         uploaded_at: new Date()
-  //       }
-  //       console.log(data);
-  //     // =============================
-  //     // 5. Insertar upload real
-  //     // =============================
-  //     const upload = await this.repo.createUpload(
-  //       {
-  //         contract_support_id: contractSupportId,
-  //         users_contract_role_id: safeUploaderRoleId,
-  //         created_by: safeCreator,
-
-  //         file_name: safeFileName,
-  //         mime_type: safeMime,
-
-  //         file_hash: fileHash,
-  //         azure_container: container,
-  //         azure_blob_path: remotePath,
-  //         azure_url: azureUrl,
-
-  //         comment: safePayload.comment || null,
-  //         uploaded_at: new Date()
-  //       },
-  //       transaction
-  //     );
-
-  //     // =============================
-  //     // 6. Historial
-  //     // =============================
-  //     await this.repo.createHistory(
-  //       {
-  //         contract_support_id: contractSupportId,
-  //         support_upload_id: upload.id,
-  //         event: "upload_created",
-  //         actor_user_id: safeCreator,
-  //         payload: { file_name: safeFileName }
-  //       },
-  //       transaction
-  //     );
-
-  //     await transaction.commit();
-  //     return upload;
-
-  //   } catch (err) {
-  //     await transaction.rollback();
-  //     throw err;
-  //   }
-  // }
   async generateForContract(contract) {
     // contract: row completo o id. Allow both.
     const contractId = typeof contract === 'object' ? contract.id : contract;
@@ -301,7 +178,7 @@ class SupportService {
       throw err;
     }
   }
-  
+
   async listByContract(contractId) {
     return this.models.ContractSupport.findAll({
       where: { contract_id: contractId },

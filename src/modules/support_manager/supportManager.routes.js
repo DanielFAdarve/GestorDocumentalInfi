@@ -31,6 +31,8 @@ module.exports = (supportService) => {
 
   //Cargar soporte
   router.post('/upload-file/:contractSupportId', controller.uploadEvidenceIntegrate);
+  // Obtener archivo en base64
+  router.get('/file-base64/:contractSupportId', controller.getEvidenceBase64);
 
   return router;
 };
